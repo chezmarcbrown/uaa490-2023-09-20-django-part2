@@ -1,0 +1,48 @@
+1) Review Assignmen#2
+
+2) Forms
+
+3) Request/Response cycle
+
+4) Django 
+- hello world
+- templates
+- static files
+
+
+python3 -m venv venv
+source venv/bin/activate
+pip install django
+pip freeze >requirements.txt
+
+0. Create project
+django-admin startproject demoproj .
+tree -L 2
+
+1. Create hello app
+python manage.py startapp hello
+
+proj/settings.py: add “hello” to INSTALLED_APPS 
+hello/views.py: write view
+hello/urls.py: create and add routes
+ proj/urls.py: add include(hello.urls) to urls
+
+
+1a. demoproj/urls.py: add hello path
+from django.urls import path, include
+
+    path("hello/", include("hello.urls")),
+
+
+1b. edit hello/view.py: index() function
+from django.http import HttpResponse
+from django.shortcuts import render
+def index(request):
+    return HttpResponse("Hello, world!")
+
+1c. create hello/urls.py: add path
+from django.urls import path
+from . import views
+urlpatterns = [
+    path("", views.index, name="index"),
+    ]
