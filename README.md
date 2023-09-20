@@ -1,10 +1,10 @@
-# uaa490-2023-09-18-django-part1
+# uaa490-2023-09-18-django-part2
 
 The recipe to run this code:
 
 ```
-git clone https://github.com/chezmarcbrown/uaa490-2023-09-18-django-part1
-cd uaa490-2023-09-18-django-part1
+git clone https://github.com/chezmarcbrown/uaa490-2023-09-18-django-part2
+cd uaa490-2023-09-18-django-part2
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
