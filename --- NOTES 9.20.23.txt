@@ -1,0 +1,185 @@
+Review:
+
+project = collection of apps 
+demoproj/settings,urls
+  settings - added app
+  urls - added path to new app
+Hello
+  url - what "view" to invoke
+  view = responder-to-request
+  view.py
+top level: manage.py how to talk to django
+
+
+1. Add new view for marc, uaa490
+
+views.py: 
+def marc(request):
+    return HttpResponse("Hello, Marc!")
+
+urls.py:
+    path("marc/", views.marc, name="marc"),
+
+2. Tedius to have url for each user;
+e.g. https://github.com/chezmarcbrown?tab=repositories
+ allow view to user URL
+
+views.py:
+def greet(request, name):
+    return HttpResponse(f"Greetings {name}!") 
+
+urls.py:
+urlpatterns = [
+    path("<str:name>", views.greet, name="greet"),
+    ...
+    ...
+]
+
+3. Order matters. Why is hello/marc showing Greetings? 
+
+4. Code in view can be arbitrary
+return HttpResponse(f"Hello, {name.capitalize()}!")
+
+5. Can return more interesting HTML:
+
+in hello/views.py:
+def marc(request):
+    return HttpResponse("<h3>Hello, <arc>!</h3><p>This space is available.</p>")
+    
+def marc(request):
+    return render(request, "hello/marc.html")
+
+create folder templates/hello/marc.html
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Hello!</title>
+    </head>
+    <body>
+        <h3>Hello, Marc!!</h3>  
+        <p>This space is available.</p>
+    </body>
+</html>
+
+How can we create greet.html? The html isn't known yet.
+
+5. replace greet with render(req, "hello/greet.html", {"name":name.capitalize()}). create greet.html
+def greet(request, name):
+    return render(request, "hello/greet.html", {
+        "name": name.capitalize()
+    })
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Hello!</title>
+    </head>
+    <body>
+        Hello, {{ name }}!
+    </body>
+</html>
+
+Add style:
+<link rel="stylesheet" href="https://cdn.simplecss.org/simple.css"> 
+
+
+Lots of files is good for separation
+----------------------
+
+www.isitchristmas.com - could change the HTML by hand, but let's use logic
+
+1. create classtoday app
+python manage.py startapp classtoday
+
+1a) add app to demoproj/settings.py add "classtoday" to INSTALLED_APPS
+
+1b) add to demoproj/urls.py:
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path("hello/", include("hello.urls")),
+    path("tasks/", include("tasks.urls")),
+    path("classtoday/", include("classtoday.urls")),
+]
+
+create classtoday/index.html:
+from django.urls import path
+from . import views
+urlpatterns = [
+    path("", views.index, name="index")
+]
+
+2. HTML or CODE first? Let's do HTML:
+
+2a) index.html
+<h1>Do we have class today? {{ classtoday}} </h1>
+
+2b. view.index:
+Use python to access datetime
+BAD: 
+import datetime
+def index(request):
+    now = datetime.datetime.now() 
+    classtoday = now.weekday() == 1 and now.weekday() == 3 
+    return render(request, "classtoday/index.html", {
+        "classtoday": "YES" if classtoday else "NO",
+    })
+
+Add some "debuggiung": 
+2c)print out the "now" in page... 
+
+    return render(request, "classtoday/index.html", {
+        "now": now,
+        "classtoday": "YES" if classtoday else "NO",
+    })
+
+<h1>Do we have class today? {{ classtoday}} </h1>
+<h2> What is today? {{ now }}</h2>
+
+2d) 
+add to settings: TIME_ZONE = 'America/Anchorage'
+
+2b.2) 
+def index(request):
+    now = datetime.datetime.now() 
+    classtoday = now.weekday() == 1 and now.weekday() == 3 
+    return render(request, "classtoday/index.html", {
+        "now": now,
+        "classtoday": "YES" if classtoday else "NO",
+    })
+
+BUGS: and => or; Monday is 0
+
+GOOD:
+def index(request):
+    now = datetime.datetime.now() 
+    return render(request, "classtoday/index.html", {
+        "classtoday": now.weekday() == 0 or now.weekday() == 2
+    })
+
+3. template classtoday/templates/classtoday/index.html:
+Class today? {{ classtoday }}
+
+{% if classtoday %}
+    <h1>YES</h1>
+{% else %}
+    <h1>NO</h1>
+{% endif %}
+
+-----------------------------------------------------------------------------------
+4. look at HTML source
+
+Issue is that static files are often served by other machines. 
+So want to link relative to where static files will be stored.
+
+5. static/classtoday/styles.css
+h1 {
+    text-align: center;
+    font-size: 90px;
+    font-family: sans-serif;
+}
+
+6. index.html  
+{% load static %}
+...
+<link href="{% static 'classtoday/styles.css' %}" rel="stylesheet">
+
